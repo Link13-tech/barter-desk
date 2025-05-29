@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Объявления</h1>
+
+  {% if user.is_authenticated %}
+    <a href="{% url 'ad_create' %}">+ Создать объявление</a>
+  {% else %}
+    <p><a href="/admin/login/">Войти</a>, чтобы добавлять объявления.</p>
+  {% endif %}
+
+  <ul>
+    {% for ad in ads %}
+      <li>
+        <a href="{% url 'ad_detail' ad.pk %}">{{ ad.title }}</a>
+        — {{ ad.category }} ({{ ad.condition }}) от {{ ad.user.username }}
+      </li>
+    {% empty %}
+      <li>Нет объявлений</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
