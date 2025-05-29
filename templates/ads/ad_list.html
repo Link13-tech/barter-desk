@@ -2,11 +2,11 @@
 {% block content %}
   <h1>Объявления</h1>
 
-  {% if user.is_authenticated %}
-    <a href="{% url 'ad_create' %}">+ Создать объявление</a>
-  {% else %}
-    <p><a href="/admin/login/">Войти</a>, чтобы добавлять объявления.</p>
-  {% endif %}
+{% if user.is_authenticated %}
+  <a href="{% url 'ad_create' %}">+ Создать объявление</a>
+{% else %}
+  <p>Войдите в аккаунт, чтобы добавлять объявления.</p>
+{% endif %}
 
   <ul>
     {% for ad in ads %}

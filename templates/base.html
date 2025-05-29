@@ -5,6 +5,19 @@
     <title>Бартерная платформа</title>
 </head>
 <body>
+
+    <!-- Навигация по логину -->
+    {% if user.is_authenticated %}
+        <p>Привет, <a href="{% url 'profile' %}">{{ user.username }}</a></p>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Выйти</button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Войти</a> | <a href="{% url 'register' %}">Регистрация</a></p>
+    {% endif %}
+
     {% block content %}{% endblock %}
+
 </body>
 </html>

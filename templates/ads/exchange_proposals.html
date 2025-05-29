@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Обменные предложения</title></head>
+<body>
+    <h1>Отправленные предложения</h1>
+    <ul>
+        {% for p in sent %}
+            <li>
+                Вы предложили обмен: {{ p.ad_sender.title }} → {{ p.ad_receiver.title }} ({{ p.status }})
+            </li>
+        {% empty %}
+            <li>Нет отправленных предложений.</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Полученные предложения</h1>
+    <ul>
+        {% for p in received %}
+            <li>
+                Вам предложили обмен:
+                {% if p.ad_receiver.user == request.user %}
+                    {{ p.ad_receiver.title }} → {{ p.ad_sender.title }}
+                {% else %}
+                    {{ p.ad_sender.title }} → {{ p.ad_receiver.title }}
+                {% endif %}
+                ({{ p.status }})
+                {% if p.status == 'pending' %}
+                    <a href="{% url 'update_exchange_status_profile' p.pk 'accepted' %}">Принять</a> |
+                    <a href="{% url 'update_exchange_status_profile' p.pk 'declined' %}">Отклонить</a>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>Нет полученных предложений.</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="{% url 'ad_list' %}">Назад</a></p>
+</body>
+</html>

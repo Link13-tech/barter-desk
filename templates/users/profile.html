@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Профиль: {{ user.username }}</h1>
+
+  <ul>
+    <li><a href="{% url 'exchange_proposals_profile' %}">Мои предложения обмена</a></li>
+  </ul>
+
+  <p><a href="{% url 'ad_list' %}">Назад</a></p>
+{% endblock %}

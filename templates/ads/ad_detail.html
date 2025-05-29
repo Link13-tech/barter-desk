@@ -15,5 +15,11 @@
     <a href="{% url 'ad_delete' ad.pk %}">Удалить</a>
   {% endif %}
 
+  {% if user.is_authenticated and ad.user != user %}
+    <form action="{% url 'create_exchange_proposal' ad.pk %}" method="get">
+        <button type="submit">Предложить обмен</button>
+    </form>
+  {% endif %}
+
   <p><a href="{% url 'ad_list' %}">Назад к списку</a></p>
 {% endblock %}

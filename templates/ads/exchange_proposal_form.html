@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Предложить обмен</title></head>
+<body>
+    <h1>Предложить обмен на: "{{ ad.title }}"</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Отправить</button>
+    </form>
+    <p><a href="{% url 'ad_list' %}">Назад</a></p>
+</body>
+</html>
