@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'ads',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +69,12 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -122,3 +130,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Введите в формате: Token <ваш_токен>'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'DEFAULT_INFO': 'config.urls.schema_view',
+    'SECURITY': [{'Token': []}],
+}
+
+LOGOUT_REDIRECT_URL = 'ad_list'

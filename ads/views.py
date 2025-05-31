@@ -16,7 +16,7 @@ def register(request):
             return redirect('ad_list')
     else:
         form = UserCreationForm()
-    return render(request, 'ads/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
 
 
 @login_required
@@ -75,7 +75,6 @@ def ad_delete(request, pk):
 def create_exchange_proposal(request, ad_id):
     ad_receiver = get_object_or_404(Ad, pk=ad_id)
 
-    # Нельзя предложить обмен самому себе
     if ad_receiver.user == request.user:
         return redirect('ad_detail', pk=ad_id)
 
@@ -84,7 +83,6 @@ def create_exchange_proposal(request, ad_id):
         if form.is_valid():
             ad_sender = form.cleaned_data['ad_sender']
 
-            # Проверяем, что ad_sender принадлежит текущему пользователю
             if ad_sender.user != request.user:
                 form.add_error('ad_sender', 'Вы должны выбрать одно из своих объявлений.')
             else:
