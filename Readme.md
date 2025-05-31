@@ -10,13 +10,13 @@
 3. Установите зависимости проекта с помощью Poetry:
    poetry install
 4. Подготовьте окружение Django:
-   poetry run python manage.py migrate
-   poetry run python manage.py createsuperuser
+   #### python manage.py migrate
+   #### python manage.py createsuperuser
 
 ## Использование
 
 Чтобы запустить сервер разработки, выполните команду:
-python manage.py runserver
+#### python manage.py runserver
 
 Приложение будет доступно по адресу: http://localhost:8000/
 
@@ -27,6 +27,6 @@ python manage.py runserver
 ## Тестирование
 
 Чтобы запустить тесты, используйте команду:
-poetry run pytest
+#### poetry run pytest
 
 Файл pytest.ini настроен на использование config.settings в качестве модуля настроек Django.
