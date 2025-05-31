@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'ads',
     'drf_yasg',
     'widget_tweaks',
+
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,5 @@ SWAGGER_SETTINGS = {
 }
 
 LOGOUT_REDIRECT_URL = 'ad_list'
+
+SWAGGER_USE_COMPAT_RENDERERS = False

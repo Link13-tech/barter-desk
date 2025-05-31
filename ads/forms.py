@@ -3,6 +3,8 @@ from .models import Ad, ExchangeProposal
 
 
 class AdForm(forms.ModelForm):
+    image_url = forms.URLField(assume_scheme='https', required=False)
+
     class Meta:
         model = Ad
         fields = ['title', 'description', 'image_url', 'category', 'condition']
