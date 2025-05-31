@@ -1,39 +1,142 @@
-<!DOCTYPE html>
-<html>
-<head><title>Обменные предложения</title></head>
-<body>
-    <h1>Отправленные предложения</h1>
-    <ul>
-        {% for p in sent %}
-            <li>
-                Вы предложили обмен: {{ p.ad_sender.title }} → {{ p.ad_receiver.title }} ({{ p.status }})
-            </li>
-        {% empty %}
-            <li>Нет отправленных предложений.</li>
-        {% endfor %}
-    </ul>
+{% extends "base.html" %}
 
-    <h1>Полученные предложения</h1>
-    <ul>
-        {% for p in received %}
-            <li>
-                Вам предложили обмен:
-                {% if p.ad_receiver.user == request.user %}
-                    {{ p.ad_receiver.title }} → {{ p.ad_sender.title }}
-                {% else %}
-                    {{ p.ad_sender.title }} → {{ p.ad_receiver.title }}
-                {% endif %}
-                ({{ p.status }})
-                {% if p.status == 'pending' %}
-                    <a href="{% url 'update_exchange_status_profile' p.pk 'accepted' %}">Принять</a> |
-                    <a href="{% url 'update_exchange_status_profile' p.pk 'declined' %}">Отклонить</a>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li>Нет полученных предложений.</li>
-        {% endfor %}
-    </ul>
+{% block title %}Обменные предложения{% endblock %}
 
-    <p><a href="{% url 'profile' %}">Назад</a></p>
-</body>
-</html>
+{% block content %}
+<div class="container py-4">
+
+  <h1 class="text-center mb-4">Обменные предложения</h1>
+
+<!-- Форма фильтрации -->
+<form method="get" class="mb-5">
+  <div class="row justify-content-center g-3">
+    <!-- Отправитель -->
+    <div class="col-md-3 text-center">
+      <label for="sender" class="form-label">Отправитель</label>
+      <select name="sender" id="sender" class="form-select">
+        <option value="">Все отправители</option>
+        {% for user in users_sender %}
+          <option value="{{ user.id }}" {% if sender_filter == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Получатель -->
+    <div class="col-md-3 text-center">
+      <label for="receiver" class="form-label">Получатель</label>
+      <select name="receiver" id="receiver" class="form-select">
+        <option value="">Все получатели</option>
+        {% for user in users_receiver %}
+          <option value="{{ user.id }}" {% if receiver_filter == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Статус -->
+    <div class="col-md-3 text-center">
+      <label for="status" class="form-label">Статус</label>
+      <select name="status" id="status" class="form-select">
+        <option value="">Все</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Ожидает</option>
+        <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Принята</option>
+        <option value="declined" {% if status_filter == 'declined' %}selected{% endif %}>Отклонена</option>
+      </select>
+    </div>
+
+    <!-- Кнопка фильтрации -->
+    <div class="col-md-2 d-flex align-items-end justify-content-center">
+      <button type="submit" class="btn btn-primary w-100">Фильтровать</button>
+    </div>
+  </div>
+</form>
+
+  <!-- Два равных списка рядом -->
+  <div class="row">
+    <!-- Отправленные предложения -->
+    <div class="col-md-6 mb-4">
+      <h3 class="text-center mb-3">Отправленные предложения</h3>
+      <ul class="list-group shadow-sm">
+        {% for p in page_obj %}
+          {% if p.ad_sender.user == request.user %}
+            <li class="list-group-item">
+              <div>
+                <strong>Вы предложили обмен:</strong> {{ p.ad_sender.title }} → {{ p.ad_receiver.title }}
+                <span class="badge bg-info text-dark ms-2">{{ p.get_status_display }}</span>
+              </div>
+              {% if p.comment %}
+                <p class="mb-0 mt-1"><strong>Комментарий:</strong> {{ p.comment }}</p>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% empty %}
+          <li class="list-group-item">Нет отправленных предложений.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Полученные предложения -->
+    <div class="col-md-6 mb-4">
+      <h3 class="text-center mb-3">Полученные предложения</h3>
+      <ul class="list-group shadow-sm">
+        {% for p in page_obj %}
+          {% if p.ad_receiver.user == request.user %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Вам предложили обмен:</strong> {{ p.ad_sender.title }} → {{ p.ad_receiver.title }}
+                <span class="badge bg-info text-dark ms-2">{{ p.get_status_display }}</span>
+                {% if p.comment %}
+                  <p class="mb-0 mt-1"><strong>Комментарий:</strong> {{ p.comment }}</p>
+                {% endif %}
+              </div>
+              {% if p.status == 'pending' %}
+                <div class="btn-group btn-group-sm">
+                  <a href="{% url 'update_exchange_status_profile' p.pk 'accepted' %}" class="btn btn-success">Принять</a>
+                  <a href="{% url 'update_exchange_status_profile' p.pk 'declined' %}" class="btn btn-danger">Отклонить</a>
+                </div>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% empty %}
+          <li class="list-group-item">Нет полученных предложений.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Пагинация по центру -->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&sender={{ sender_filter }}&receiver={{ receiver_filter }}&status={{ status_filter }}" aria-label="Previous">&laquo;</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}&sender={{ sender_filter }}&receiver={{ receiver_filter }}&status={{ status_filter }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&sender={{ sender_filter }}&receiver={{ receiver_filter }}&status={{ status_filter }}" aria-label="Next">&raquo;</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <p class="text-center mt-4">
+    <a href="{% url 'profile' %}" class="btn btn-secondary">Назад</a>
+  </p>
+
+</div>
+{% endblock %}
