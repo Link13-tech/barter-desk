@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -26,7 +28,36 @@ def profile_view(request):
 
 def ad_list(request):
     ads = Ad.objects.all().order_by('-created_at')
-    return render(request, 'ads/ad_list.html', {'ads': ads})
+
+    search_query = request.GET.get('q', '')
+    category_filter = request.GET.get('category', '')
+    condition_filter = request.GET.get('condition', '')
+
+    if search_query:
+        ads = ads.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
+
+    if category_filter:
+        ads = ads.filter(category=category_filter)
+
+    if condition_filter:
+        ads = ads.filter(condition=condition_filter)
+
+    paginator = Paginator(ads, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    categories = Ad.objects.values_list('category', flat=True).distinct()
+    conditions = [choice[0] for choice in Ad.CONDITION_CHOICES]
+
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'condition_filter': condition_filter,
+        'categories': categories,
+        'conditions': conditions,
+    }
+    return render(request, 'ads/ad_list.html', context)
 
 
 def ad_detail(request, pk):
@@ -110,12 +141,40 @@ def create_exchange_proposal(request, ad_id):
 
 @login_required
 def exchange_proposals(request):
-    sent = ExchangeProposal.objects.filter(ad_sender__user=request.user)
-    received = ExchangeProposal.objects.filter(ad_receiver__user=request.user)
-    return render(request, 'ads/exchange_proposals.html', {
-        'sent': sent,
-        'received': received,
-    })
+    proposals = ExchangeProposal.objects.filter(
+        Q(ad_sender__user=request.user) | Q(ad_receiver__user=request.user)
+    ).order_by('-created_at')
+
+    sender_filter = request.GET.get('sender', '')
+    receiver_filter = request.GET.get('receiver', '')
+    status_filter = request.GET.get('status', '')
+
+    if sender_filter:
+        proposals = proposals.filter(ad_sender__user__id=sender_filter)
+    if receiver_filter:
+        proposals = proposals.filter(ad_receiver__user__id=receiver_filter)
+    if status_filter:
+        proposals = proposals.filter(status=status_filter)
+
+    paginator = Paginator(proposals, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    user_ads = Ad.objects.filter(user=request.user)
+
+    users_sender = User.objects.filter(ads__sent_proposals__ad_receiver__user=request.user).distinct()
+    users_receiver = User.objects.filter(ads__received_proposals__ad_sender__user=request.user).distinct()
+
+    context = {
+        'page_obj': page_obj,
+        'user_ads': user_ads,
+        'sender_filter': sender_filter,
+        'receiver_filter': receiver_filter,
+        'status_filter': status_filter,
+        'users_sender': users_sender,
+        'users_receiver': users_receiver,
+    }
+    return render(request, 'ads/exchange_proposals.html', context)
 
 
 @login_required

@@ -1,25 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>{{ ad.title }}</h2>
-  <p><strong>Категория:</strong> {{ ad.category }}</p>
-  <p><strong>Состояние:</strong> {{ ad.condition }}</p>
-  <p><strong>Описание:</strong> {{ ad.description }}</p>
-  {% if ad.image_url %}
-    <img src="{{ ad.image_url }}" alt="{{ ad.title }}" style="max-width: 300px;">
-  {% endif %}
-  <p><strong>Автор:</strong> {{ ad.user.username }}</p>
-  <p><strong>Опубликовано:</strong> {{ ad.created_at }}</p>
+<div class="card mx-auto" style="max-width: 600px;">
+  <div class="card-body">
+    <h2 class="card-title mb-3">{{ ad.title }}</h2>
 
-  {% if user == ad.user %}
-    <a href="{% url 'ad_update' ad.pk %}">Редактировать</a> |
-    <a href="{% url 'ad_delete' ad.pk %}">Удалить</a>
-  {% endif %}
+    {% if ad.image_url %}
+      <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="img-fluid mb-3 rounded" style="max-height: 300px; object-fit: contain;">
+    {% endif %}
 
-  {% if user.is_authenticated and ad.user != user %}
-    <form action="{% url 'create_exchange_proposal' ad.pk %}" method="get">
-        <button type="submit">Предложить обмен</button>
-    </form>
-  {% endif %}
+    <p><strong>Категория:</strong> {{ ad.category }}</p>
+    <p><strong>Состояние:</strong> {{ ad.condition }}</p>
+    <p><strong>Описание:</strong><br> {{ ad.description|linebreaksbr }}</p>
 
-  <p><a href="{% url 'ad_list' %}">Назад к списку</a></p>
+    <p><strong>Автор:</strong> {{ ad.user.username }}</p>
+    <p><strong>Опубликовано:</strong> {{ ad.created_at|date:"d.m.Y H:i" }}</p>
+
+    <div class="mt-4">
+      {% if user == ad.user %}
+        <a href="{% url 'ad_update' ad.pk %}" class="btn btn-warning me-2">Редактировать</a>
+        <a href="{% url 'ad_delete' ad.pk %}" class="btn btn-danger delete-btn">Удалить</a>
+      {% endif %}
+
+      {% if user.is_authenticated and ad.user != user %}
+        <form action="{% url 'create_exchange_proposal' ad.pk %}" method="get" class="d-inline">
+          <button type="submit" class="btn btn-primary">Предложить обмен</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-3">
+  <a href="{% url 'ad_list' %}" class="btn btn-secondary btn-sm">Назад к списку</a>
+</div>
 {% endblock %}

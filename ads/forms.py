@@ -16,7 +16,7 @@ class ExchangeProposalForm(forms.ModelForm):
         fields = ['ad_sender', 'comment']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Получаем переданного пользователя
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user is not None:
             self.fields['ad_sender'].queryset = Ad.objects.filter(user=user)

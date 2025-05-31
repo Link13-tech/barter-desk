@@ -1,21 +1,102 @@
 {% extends "base.html" %}
+
 {% block content %}
-  <h1>Объявления</h1>
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold">Объявления</h1>
 
-{% if user.is_authenticated %}
-  <a href="{% url 'ad_create' %}">+ Создать объявление</a>
-{% else %}
-  <p>Войдите в аккаунт, чтобы добавлять объявления.</p>
-{% endif %}
+    {% if user.is_authenticated %}
+      <a href="{% url 'ad_create' %}" class="btn btn-success mt-2">+ Создать объявление</a>
+    {% else %}
+      <p class="text-muted mt-2">Войдите в аккаунт, чтобы добавлять объявления.</p>
+    {% endif %}
+  </div>
 
-  <ul>
-    {% for ad in ads %}
-      <li>
-        <a href="{% url 'ad_detail' ad.pk %}">{{ ad.title }}</a>
-        — {{ ad.category }} ({{ ad.condition }}) от {{ ad.user.username }}
-      </li>
-    {% empty %}
-      <li>Нет объявлений</li>
-    {% endfor %}
-  </ul>
+  <!-- Форма поиска и фильтры -->
+  <form method="get" class="row g-3 mb-4 justify-content-center">
+    <div class="col-md-4">
+      <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ search_query }}">
+    </div>
+
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">Все категории</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if cat == category_filter %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select name="condition" class="form-select">
+        <option value="">Все состояния</option>
+        {% for cond in conditions %}
+          <option value="{{ cond }}" {% if cond == condition_filter %}selected{% endif %}>
+            {% if cond == 'new' %}Новый{% elif cond == 'used' %}Б/у{% else %}{{ cond }}{% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-primary">Фильтровать</button>
+    </div>
+  </form>
+
+  {% if page_obj.object_list %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for ad in page_obj %}
+        <div class="col">
+          <div class="card h-100 shadow-sm fade-in">
+            <img src="{{ ad.image_url|default:'/static/img/default_ad.png' }}"
+                 alt="{{ ad.title }}"
+                 class="card-img-top"
+                 style="width: 100%; height: 180px; object-fit: contain; margin-top: 18px;">
+            <div class="card-body">
+              <h5 class="card-title">
+                <a href="{% url 'ad_detail' ad.pk %}" class="text-decoration-none">{{ ad.title }}</a>
+              </h5>
+              <p class="card-text mb-1"><strong>Категория:</strong> {{ ad.category }}</p>
+              <p class="card-text mb-1"><strong>Состояние:</strong>
+                {% if ad.condition == 'new' %}Новый{% elif ad.condition == 'used' %}Б/у{% else %}{{ ad.condition }}{% endif %}
+              </p>
+              <p class="card-text text-muted"><small>Автор: {{ ad.user.username }}</small></p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    <nav aria-label="Page navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_filter %}category={{ category_filter }}&{% endif %}{% if condition_filter %}condition={{ condition_filter }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_filter %}category={{ category_filter }}&{% endif %}{% if condition_filter %}condition={{ condition_filter }}&{% endif %}page={{ num }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if category_filter %}category={{ category_filter }}&{% endif %}{% if condition_filter %}condition={{ condition_filter }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% else %}
+    <p class="text-center text-muted">Нет объявлений</p>
+  {% endif %}
 {% endblock %}

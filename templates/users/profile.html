@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 
+{% block title %}Профиль пользователя {{ user.username }}{% endblock %}
+
 {% block content %}
-  <h1>Профиль: {{ user.username }}</h1>
+<div class="card mx-auto" style="max-width: 400px;">
+  <div class="card-body text-center">
+    <h2 class="card-title mb-3">Профиль: <strong>{{ user.username }}</strong></h2>
 
-  <ul>
-    <li><a href="{% url 'exchange_proposals_profile' %}">Мои предложения обмена</a></li>
-  </ul>
+    <ul class="list-group mb-3 text-start">
+      <li class="list-group-item">
+        <a href="{% url 'exchange_proposals_profile' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+          <i class="bi bi-arrow-left-right fs-5 text-success"></i>
+          <span class="fw-semibold text-success">Мои предложения обмена</span>
+        </a>
+      <!-- Можешь сюда добавить еще пункты меню -->
+    </ul>
 
-  <p><a href="{% url 'ad_list' %}">Назад</a></p>
+    <a href="{% url 'ad_list' %}" class="btn btn-secondary">Назад к объявлениям</a>
+  </div>
+</div>
 {% endblock %}
